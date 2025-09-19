@@ -19,7 +19,7 @@ pipeline {
             stages {
                 stage('Verify Nginx Config') {
                     steps {
-                        script {
+                        sshagent(credentials: [CREDENTIALS_ID]) {
                             def remoteScript = """
                             echo "!!!=> Change Working Directory to: ${WORKING_DIR}"
                             echo =============================================
