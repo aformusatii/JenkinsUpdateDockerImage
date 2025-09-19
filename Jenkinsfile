@@ -20,47 +20,49 @@ pipeline {
                 stage('Verify Nginx Config') {
                     steps {
                         sshagent(credentials: [CREDENTIALS_ID]) {
-                            def remoteScript = """
-                            echo "!!!=> Change Working Directory to: ${WORKING_DIR}"
-                            echo =============================================
-                            cd ${WORKING_DIR}
-                            service=${SERVICE}
+                            script {
+                                def remoteScript = """
+                                echo "!!!=> Change Working Directory to: ${WORKING_DIR}"
+                                echo =============================================
+                                cd ${WORKING_DIR}
+                                service=${SERVICE}
 
-                            echo "!!!=> Information about current image"
-                            echo =============================================
-                            imageId=\$(docker compose images --format json \${service} | jq -r '.[0].ID')
-                            imageDigest=\$(docker images --digests  --format json --no-trunc | jq --indent 2 --arg v "\${imageId}" -c 'select(.ID == \$v)')
-                            echo "\${imageDigest}"
-                            echo =============================================
+                                echo "!!!=> Information about current image"
+                                echo =============================================
+                                imageId=\$(docker compose images --format json \${service} | jq -r '.[0].ID')
+                                imageDigest=\$(docker images --digests  --format json --no-trunc | jq --indent 2 --arg v "\${imageId}" -c 'select(.ID == \$v)')
+                                echo "\${imageDigest}"
+                                echo =============================================
 
-                            echo "!!!=> Try to pull latest image(s)"
-                            echo =============================================
-                            docker compose pull \${service}
-                            echo =============================================
+                                echo "!!!=> Try to pull latest image(s)"
+                                echo =============================================
+                                docker compose pull \${service}
+                                echo =============================================
 
-                            echo "!!!=> Force recreate the image with latest image"
-                            echo =============================================
-                            docker compose up -d --no-deps --force-recreate --build \${service}
-                            echo ============================================= 
+                                echo "!!!=> Force recreate the image with latest image"
+                                echo =============================================
+                                docker compose up -d --no-deps --force-recreate --build \${service}
+                                echo ============================================= 
 
-                            echo "!!!=> Information about new image"
-                            echo =============================================
-                            imageId=\$(docker compose images --format json \${service} | jq -r '.[0].ID')
-                            imageDigest=\$(docker images --digests  --format json --no-trunc | jq --indent 2 --arg v "\${imageId}" -c 'select(.ID == \$v)')
-                            echo "\${imageDigest}"
-                            echo =============================================
-                            """.stripIndent().trim()
+                                echo "!!!=> Information about new image"
+                                echo =============================================
+                                imageId=\$(docker compose images --format json \${service} | jq -r '.[0].ID')
+                                imageDigest=\$(docker images --digests  --format json --no-trunc | jq --indent 2 --arg v "\${imageId}" -c 'select(.ID == \$v)')
+                                echo "\${imageDigest}"
+                                echo =============================================
+                                """.stripIndent().trim()
 
-                            def sshCommand = """
-                                ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} 'bash -s' << 'EOF'
-                                ${remoteScript}
-    EOF
-            """.stripIndent().trim()
+                                def sshCommand = """
+                            ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} 'bash -s' << 'EOF'
+                            ${remoteScript}
+EOF
+        """.stripIndent().trim()
 
-                            echo "Executing SSH command:"
-                            echo "${sshCommand}"
+                                echo "Executing SSH command:"
+                                echo "${sshCommand}"
 
-                            sh sshCommand
+                                sh sshCommand
+                            }
                         }
                     }
                 }
