@@ -6,6 +6,8 @@ pipeline {
         string(name: 'SSH_HOST', description: 'SSH Host Where Docker Composer Runs', defaultValue: '192.168.100.5')
         string(name: 'SSH_USER', description: 'SSH User', defaultValue: 'aform')
         string(name: 'CREDENTIALS_ID', description: 'SSH Credentials ID', defaultValue: 'ubuntu-vm-on-T580')
+        string(name: 'FEED_VERSION', description: 'Feed Version', defaultValue: 'v0.1.0')
+        string(name: 'FEED_CONTENT', description: 'Feed Content', defaultValue: 'Initial commit')
     }
     environment {
         SERVICE                     = "${params.SERVICE}"
@@ -13,6 +15,8 @@ pipeline {
         SSH_HOST                    = "${params.SSH_HOST}"
         SSH_USER                    = "${params.SSH_USER}"
         CREDENTIALS_ID              = "${params.CREDENTIALS_ID}"
+        FEED_VERSION                = "${params.FEED_VERSION}"
+        FEED_CONTENT                = "${params.FEED_CONTENT}"
     }
     stages {
         stage('On Jenkins Host') {
@@ -72,7 +76,7 @@ EOF
     post {
         always {
             script {
-                currentBuild.description = "${params.SERVICE} on ${params.SSH_HOST}"
+                currentBuild.description = "${params.SERVICE} on ${params.SSH_HOST}\n${params.FEED_VERSION}"
             }
         }
     }    
